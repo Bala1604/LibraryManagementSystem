@@ -4,31 +4,42 @@ import java.time.LocalDate;
 
 public class IssueRecord {
 
-    private Book book;
-    private Student student;
+    private String bookId;
+    private String bookTitle;
+    private String studentId;
+    private String studentName;
+
     private LocalDate issueDate;
     private LocalDate dueDate;
+    private LocalDate returnDate;
 
     // Constructor
-    public IssueRecord(Book book, Student student) {
+    public IssueRecord(String bookId, String bookTitle,
+                       String studentId, String studentName) {
 
-        this.book = book;
-        this.student = student;
+        this.bookId = bookId;
+        this.bookTitle = bookTitle;
+        this.studentId = studentId;
+        this.studentName = studentName;
 
-        // Current date
-        this.issueDate = LocalDate.now();
-
-        // Due date after 14 days
-        this.dueDate = issueDate.plusDays(14);
+        issueDate = LocalDate.now();
+        dueDate = issueDate.plusDays(14);
     }
 
-    // Getters
-    public Book getBook() {
-        return book;
+    public String getBookId() {
+        return bookId;
     }
 
-    public Student getStudent() {
-        return student;
+    public String getBookTitle() {
+        return bookTitle;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public String getStudentName() {
+        return studentName;
     }
 
     public LocalDate getIssueDate() {
@@ -39,14 +50,23 @@ public class IssueRecord {
         return dueDate;
     }
 
-    // Display issue details
+    public LocalDate getReturnDate() {
+        return returnDate;
+    }
+
+    public void setReturnDate(LocalDate returnDate) {
+        this.returnDate = returnDate;
+    }
+
     public void displayIssueDetails() {
 
-        System.out.println("Book ID     : " + book.getBookId());
-        System.out.println("Book Title  : " + book.getTitle());
-        System.out.println("Student ID  : " + student.getStudentId());
-        System.out.println("Student Name: " + student.getStudentName());
-        System.out.println("Issue Date  : " + issueDate);
-        System.out.println("Due Date    : " + dueDate);
+        System.out.println("\n===== ISSUE DETAILS =====");
+
+        System.out.println("Book ID      : " + bookId);
+        System.out.println("Book Title   : " + bookTitle);
+        System.out.println("Student ID   : " + studentId);
+        System.out.println("Student Name : " + studentName);
+        System.out.println("Issue Date   : " + issueDate);
+        System.out.println("Due Date     : " + dueDate);
     }
 }

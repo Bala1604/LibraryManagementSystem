@@ -1,107 +1,183 @@
 package librarymanagement;
 
+import java.util.Scanner;
+
 public class Main {
 
     public static void main(String[] args) {
 
-        // Create Library
+        Scanner sc = new Scanner(System.in);
+
         Library library = new Library();
 
-        // Create Books
-        Book book1 = new Book(
-                "B101",
-                "Java Programming",
-                "Herbert Schildt"
-        );
+        int choice;
 
-        Book book2 = new Book(
-                "B102",
-                "SQL Basics",
-                "James"
-        );
+        do {
 
-        Book book3 = new Book(
-                "B103",
-                "Spring Boot",
-                "Craig Walls"
-        );
+            System.out.println("\n===== LIBRARY MANAGEMENT SYSTEM =====");
 
-        // Add books
-        library.addBook(book1);
-        library.addBook(book2);
-        library.addBook(book3);
+            System.out.println("1. Add Book");
+            System.out.println("2. Display All Books");
+            System.out.println("3. Search Book");
+            System.out.println("4. Issue Book");
+            System.out.println("5. Return Book");
+            System.out.println("6. Check Book Availability");
+            System.out.println("7. Calculate Fine");
+            System.out.println("8. Due Date Reminder");
+            System.out.println("9. Generate Report");
+            System.out.println("0. Exit");
 
-        // Create Student
-        Student student1 =
-                new Student("S101", "Balamurugan");
+            System.out.print("\nEnter your choice: ");
 
+            choice = sc.nextInt();
 
-        library.displayAllBooks();
+            switch (choice) {
 
-        // Issue book
-        System.out.println("\n===== ISSUE BOOK =====");
+                case 1:
 
-        library.issueBook("B101", student1);
+                    System.out.println("\n===== ADD BOOK =====");
 
-        // Check availability
-        System.out.println("\n===== CHECK AVAILABILITY =====");
+                    System.out.print("Enter Book ID: ");
+                    String bookId = sc.next();
 
-        library.checkAvailability("B101");
+                    sc.nextLine();
 
-        // Search book
-        System.out.println("\n===== SEARCH BOOK =====");
+                    System.out.print("Enter Book Title: ");
+                    String title = sc.nextLine();
 
-        library.searchBook("B101");
-        
-     // Return book
-        System.out.println("\n===== RETURN BOOK =====");
+                    System.out.print("Enter Author Name: ");
+                    String author = sc.nextLine();
 
-        library.returnBook("B101");
+                    Book book = new Book(
+                            bookId,
+                            title,
+                            author
+                    );
 
-        // Check availability again
-        System.out.println("\n===== AVAILABILITY AFTER RETURN =====");
+                    library.addBook(book);
 
-        library.checkAvailability("B101");
-        
-        
-        Librarian librarian =new Librarian("Arun");
-        
-        System.out.println("\n===== LIBRARIAN APPROVAL =====");
+                    break;
 
-        Book requestedBook =library.findBook("B101");
+                case 2:
 
-        boolean approved =librarian.approveBookIssue(requestedBook);
+                    library.displayBooks();
 
-        if (approved) {
+                    break;
 
-            library.issueBook("B101",student1 );
-        }
-        
-        System.out.println("\n===== FINE COLLECTION =====");
+                case 3:
 
-        librarian.collectFine(15);
-        
-        System.out.println("\n===== DUE DATE REMINDER =====");
+                    System.out.println("\n===== SEARCH BOOK =====");
 
-        library.dueDateReminder();
-        
-        
-        System.out.println("\n===== GENERATE REPORT =====");
+                    System.out.print("Enter Book ID to search: ");
 
-        library.generateReport();
-        
-        Librarian librarian1 = new Librarian("Arun");
+                    String searchId = sc.next();
 
-        System.out.println("\n===== LIBRARIAN REPORT =====");
+                    library.searchBook(searchId);
 
-        librarian1.generateReport(library);
+                    break;
 
-        System.out.println("\n===== LIBRARIAN DUE REMINDER =====");
+                case 4:
 
-        librarian1.showDueDateReminder(library);
+                    System.out.println("\n===== ISSUE BOOK =====");
+
+                    System.out.print("Enter Book ID: ");
+                    String issueBookId = sc.next();
+
+                    System.out.print("Enter Student ID: ");
+                    String studentId = sc.next();
+
+                    sc.nextLine();
+
+                    System.out.print("Enter Student Name: ");
+                    String studentName = sc.nextLine();
+
+                    library.issueBook(
+                            issueBookId,
+                            studentId,
+                            studentName
+                    );
+
+                    break;
+
+                case 5:
+
+                    System.out.println("\n===== RETURN BOOK =====");
+
+                    System.out.print("Enter Book ID: ");
+
+                    String returnBookId = sc.next();
+
+                    library.returnBook(returnBookId);
+
+                    break;
+
+                case 6:
+
+                    System.out.println(
+                            "\n===== CHECK BOOK AVAILABILITY ====="
+                    );
+
+                    System.out.print("Enter Book ID: ");
+
+                    String availabilityBookId = sc.next();
+
+                    library.checkAvailability(
+                            availabilityBookId
+                    );
+
+                    break;
+
+                case 7:
+
+                    System.out.println("\n===== FINE CALCULATOR =====");
+
+                    System.out.print("Enter late days: ");
+
+                    long lateDays = sc.nextLong();
+
+                    library.calculateFine(lateDays);
+
+                    break;
+
+                case 8:
+
+                    System.out.println(
+                            "\n===== DUE DATE REMINDER ====="
+                    );
+
+                    System.out.print("Enter Book ID: ");
+
+                    String reminderBookId = sc.next();
+
+                    library.dueDateReminder(
+                            reminderBookId
+                    );
+
+                    break;
+
+                case 9:
+
+                    library.generateReport();
+
+                    break;
+
+                case 0:
+
+                    System.out.println(
+                            "\nThank you for using Library Management System!"
+                    );
+
+                    break;
+
+                default:
+
+                    System.out.println(
+                            "Invalid choice! Please try again."
+                    );
+            }
+
+        } while (choice != 0);
+
+        sc.close();
     }
-    
-   
-   
-    
 }

@@ -1,37 +1,26 @@
 package librarymanagement;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-
 public class FineCalculator {
 
-    private static final double FINE_PER_DAY = 5.0;
+    private static final double FINE_PER_DAY = 10.0;
 
-    public static double calculateFine(LocalDate dueDate,
-                                       LocalDate returnDate) {
+    // Calculate fine
+    public double calculateFine(long lateDays) {
 
-        if (!returnDate.isAfter(dueDate)) {
+        if (lateDays <= 0) {
             return 0;
         }
-
-        long lateDays = ChronoUnit.DAYS.between(
-                dueDate,
-                returnDate
-        );
 
         return lateDays * FINE_PER_DAY;
     }
 
-    public static long calculateLateDays(LocalDate dueDate,
-                                         LocalDate returnDate) {
+    // Display fine
+    public void displayFine(long lateDays) {
 
-        if (!returnDate.isAfter(dueDate)) {
-            return 0;
-        }
+        double fine = calculateFine(lateDays);
 
-        return ChronoUnit.DAYS.between(
-                dueDate,
-                returnDate
-        );
+        System.out.println("\n===== FINE DETAILS =====");
+        System.out.println("Late Days : " + lateDays);
+        System.out.println("Fine      : ₹" + fine);
     }
 }

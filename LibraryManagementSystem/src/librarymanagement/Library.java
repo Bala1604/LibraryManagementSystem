@@ -1,27 +1,24 @@
 package librarymanagement;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Library {
 
-    // Store all books
-    private ArrayList<Book> books;
+    private ArrayList<Book> books = new ArrayList<>();
 
-    // Store issued books
-    private Map<String, IssueRecord> issuedBooks;
+    private Map<String, Book> issuedBooks = new HashMap<>();
 
-    // Constructor
-    public Library() {
-        books = new ArrayList<>();
-        issuedBooks = new HashMap<>();
-    }
+    private Map<String, IssueRecord> issueRecords = new HashMap<>();
 
-    // =========================
+    private FineCalculator fineCalculator = new FineCalculator();
+
+    // ==========================================
     // ADD BOOK
-    // =========================
+    // ==========================================
 
     public void addBook(Book book) {
 
@@ -30,30 +27,28 @@ public class Library {
         System.out.println("Book added successfully!");
     }
 
-    // =========================
+    // ==========================================
     // DISPLAY ALL BOOKS
-    // =========================
+    // ==========================================
 
-    public void displayAllBooks() {
-
-        if (books.isEmpty()) {
-            System.out.println("No books available in the library.");
-            return;
-        }
+    public void displayBooks() {
 
         System.out.println("\n===== ALL BOOKS =====");
 
+        if (books.isEmpty()) {
+            System.out.println("No books available.");
+            return;
+        }
+
         for (Book book : books) {
 
-            book.displayBook();
-
-            System.out.println("----------------------");
+            book.displayBookDetails();
         }
     }
 
-    // =========================
+    // ==========================================
     // SEARCH BOOK
-    // =========================
+    // ==========================================
 
     public void searchBook(String bookId) {
 
@@ -61,70 +56,53 @@ public class Library {
 
             if (book.getBookId().equalsIgnoreCase(bookId)) {
 
-                System.out.println("\nBook found!");
+                System.out.println("\n===== BOOK FOUND =====");
 
-                book.displayBook();
-
-                return;
-            }
-        }
-
-        System.out.println("Book not found.");
-    }
-
-    // =========================
-    // CHECK AVAILABILITY
-    // =========================
-
-    public void checkAvailability(String bookId) {
-
-        for (Book book : books) {
-
-            if (book.getBookId().equalsIgnoreCase(bookId)) {
-
-                if (book.isAvailable()) {
-
-                    System.out.println("Book is available.");
-
-                } else {
-
-                    System.out.println("Book is currently issued.");
-                }
+                book.displayBookDetails();
 
                 return;
             }
         }
 
-        System.out.println("Book not found.");
+        System.out.println("Book not found!");
     }
 
-    // =========================
+    // ==========================================
     // ISSUE BOOK
-    // =========================
+    // ==========================================
 
-    public void issueBook(String bookId, Student student) {
+    public void issueBook(String bookId,
+                           String studentId,
+                           String studentName) {
 
         for (Book book : books) {
 
             if (book.getBookId().equalsIgnoreCase(bookId)) {
 
-                // Check availability
                 if (!book.isAvailable()) {
 
-                    System.out.println("Book is already issued.");
-
+                    System.out.println("Book is already issued!");
                     return;
                 }
 
-                // Create issue record
-                IssueRecord record =
-                        new IssueRecord(book, student);
-
-                // Store in HashMap
-                issuedBooks.put(book.getBookId(), record);
-
-                // Mark book as unavailable
+                // Mark book as issued
                 book.setAvailable(false);
+
+                // Store issued book
+                issuedBooks.put(bookId, book);
+
+                // Create issue record
+                IssueRecord record = new IssueRecord(
+                        book.getBookId(),
+                        book.getTitle(),
+                        studentId,
+                        studentName
+                );
+
+                // Store issue record
+                issueRecords.put(bookId, record);
+
+                System.out.println("\n===== ISSUE BOOK =====");
 
                 System.out.println("Book issued successfully!");
 
@@ -134,156 +112,181 @@ public class Library {
             }
         }
 
-        System.out.println("Book not found.");
+        System.out.println("Book not found!");
     }
-    
- // =========================
- // RETURN BOOK
- // =========================
 
- public void returnBook(String bookId) {
+    // ==========================================
+    // RETURN BOOK
+    // ==========================================
 
-     // Check whether book is issued
-     IssueRecord record = issuedBooks.get(bookId);
+    public void returnBook(String bookId) {
 
-     if (record == null) {
-         System.out.println("This book is not currently issued.");
-         return;
-     }
+        IssueRecord record = issueRecords.get(bookId);
 
-     // Get return date
-     java.time.LocalDate returnDate =
-             java.time.LocalDate.now();
+        if (record == null) {
 
-     // Calculate fine
-     double fine = FineCalculator.calculateFine(
-             record.getDueDate(),
-             returnDate
-     );
+            System.out.println("This book is not currently issued!");
+            return;
+        }
 
-     long lateDays = FineCalculator.calculateLateDays(
-             record.getDueDate(),
-             returnDate
-     );
+        LocalDate returnDate = LocalDate.now();
 
-     System.out.println("\n===== RETURN DETAILS =====");
+        record.setReturnDate(returnDate);
 
-     System.out.println("Book ID     : "
-             + record.getBook().getBookId());
+        // Calculate late days
+        long lateDays = ChronoUnit.DAYS.between(
+                record.getDueDate(),
+                returnDate
+        );
 
-     System.out.println("Book Title  : "
-             + record.getBook().getTitle());
+        if (lateDays < 0) {
+            lateDays = 0;
+        }
 
-     System.out.println("Student Name: "
-             + record.getStudent().getStudentName());
+        // Calculate fine
+        double fine = fineCalculator.calculateFine(lateDays);
 
-     System.out.println("Issue Date  : "
-             + record.getIssueDate());
+        System.out.println("\n===== RETURN DETAILS =====");
 
-     System.out.println("Due Date    : "
-             + record.getDueDate());
+        System.out.println("Book ID      : " + record.getBookId());
+        System.out.println("Book Title   : " + record.getBookTitle());
+        System.out.println("Student Name : " + record.getStudentName());
+        System.out.println("Issue Date   : " + record.getIssueDate());
+        System.out.println("Due Date     : " + record.getDueDate());
+        System.out.println("Return Date  : " + record.getReturnDate());
+        System.out.println("Late Days    : " + lateDays);
+        System.out.println("Fine         : ₹" + fine);
 
-     System.out.println("Return Date : "
-             + returnDate);
+        // Make book available
+        Book book = issuedBooks.get(bookId);
 
-     System.out.println("Late Days   : "
-             + lateDays);
+        if (book != null) {
+            book.setAvailable(true);
+        }
 
-     System.out.println("Fine        : ₹"
-             + fine);
+        // Remove issue information
+        issuedBooks.remove(bookId);
+        issueRecords.remove(bookId);
 
-     // Make book available
-     record.getBook().setAvailable(true);
+        System.out.println("\nBook returned successfully!");
+    }
 
-     // Remove from issued books
-     issuedBooks.remove(bookId);
+    // ==========================================
+    // CHECK AVAILABILITY
+    // ==========================================
 
-     System.out.println("Book returned successfully!");  
-     
- }
- 
-//Find book by ID
-public Book findBook(String bookId) {
+    public void checkAvailability(String bookId) {
 
-  for (Book book : books) {
+        for (Book book : books) {
 
-      if (book.getBookId().equalsIgnoreCase(bookId)) {
-          return book;
-      }
-  }
+            if (book.getBookId().equalsIgnoreCase(bookId)) {
 
-  return null;
+                if (book.isAvailable()) {
+                    System.out.println("Book is available.");
+                } else {
+                    System.out.println("Book is currently issued.");
+                }
+
+                return;
+            }
+        }
+
+        System.out.println("Book not found!");
+    }
+
+    // ==========================================
+    // CALCULATE FINE
+    // ==========================================
+
+    public void calculateFine(long lateDays) {
+
+        fineCalculator.displayFine(lateDays);
+    }
+
+    // ==========================================
+    // DUE DATE REMINDER
+    // ==========================================
+
+    public void dueDateReminder(String bookId) {
+
+        IssueRecord record = issueRecords.get(bookId);
+
+        if (record == null) {
+
+            System.out.println("This book is not currently issued!");
+            return;
+        }
+
+        LocalDate today = LocalDate.now();
+
+        LocalDate dueDate = record.getDueDate();
+
+        long daysRemaining = ChronoUnit.DAYS.between(
+                today,
+                dueDate
+        );
+
+        System.out.println("\n===== DUE DATE REMINDER =====");
+
+        System.out.println("Book ID      : " + record.getBookId());
+        System.out.println("Book Title   : " + record.getBookTitle());
+        System.out.println("Student Name : " + record.getStudentName());
+        System.out.println("Due Date     : " + dueDate);
+
+        if (daysRemaining > 0) {
+
+            System.out.println("Days Remaining : " + daysRemaining);
+
+            if (daysRemaining <= 3) {
+
+                System.out.println(
+                        "Reminder: Book is due in "
+                        + daysRemaining
+                        + " days!"
+                );
+
+            } else {
+
+                System.out.println("Book is not due yet.");
+            }
+
+        } else if (daysRemaining == 0) {
+
+            System.out.println("Book is due today!");
+
+        } else {
+
+            long overdueDays = Math.abs(daysRemaining);
+
+            System.out.println("Days Overdue : " + overdueDays);
+            System.out.println("Reminder: Book is overdue!");
+        }
+    }
+
+    // ==========================================
+    // GENERATE REPORT
+    // ==========================================
+
+    public void generateReport() {
+
+        int totalBooks = books.size();
+
+        int availableBooks = 0;
+        int issuedBooksCount = 0;
+
+        for (Book book : books) {
+
+            if (book.isAvailable()) {
+                availableBooks++;
+            } else {
+                issuedBooksCount++;
+            }
+        }
+
+        System.out.println("\n===== LIBRARY REPORT =====");
+
+        System.out.println("Total Books     : " + totalBooks);
+        System.out.println("Available Books : " + availableBooks);
+        System.out.println("Issued Books    : " + issuedBooksCount);
+    }
 }
-
-
-//=========================
-//DUE DATE REMINDER
-//=========================
-
-public void dueDateReminder() {
-
- if (issuedBooks.isEmpty()) {
-
-     System.out.println("No books are currently issued.");
-     return;
- }
-
- java.time.LocalDate today = java.time.LocalDate.now();
-
- System.out.println("\n===== DUE DATE REMINDER =====");
-
- for (IssueRecord record : issuedBooks.values()) {
-
-     java.time.LocalDate dueDate = record.getDueDate();
-
-     System.out.println("\nBook       : "  + record.getBook().getTitle());
-
-     System.out.println("Student    : "  + record.getStudent().getStudentName());
-
-     System.out.println("Due Date   : " + dueDate);
-
-     if (today.isAfter(dueDate)) {
-
-         System.out.println("Status     : OVERDUE");
-
-     } else if (today.isEqual(dueDate)) {
-
-         System.out.println("Status     : DUE TODAY");
-
-     } else {
-
-         long remainingDays = java.time.temporal.ChronoUnit.DAYS.between(today,dueDate);
-
-         System.out.println( "Status     : Due in " + remainingDays    + " days" );
-     }
- }
-}
-//=========================
-//GENERATE LIBRARY REPORT
-//=========================
-
-public void generateReport() {
-
- int totalBooks = books.size();
- int availableBooks = 0;
- int issuedBooksCount = issuedBooks.size();
-
- for (Book book : books) {
-
-     if (book.isAvailable()) {
-         availableBooks++;
-     }
- }
-
- System.out.println("\n====================================");
- System.out.println("          LIBRARY REPORT");
- System.out.println("====================================");
-
- System.out.println("Total Books     : " + totalBooks);
- System.out.println("Available Books : " + availableBooks);
- System.out.println("Issued Books    : " + issuedBooksCount);
-
- System.out.println("====================================");
-}
-}
-
